@@ -14,7 +14,7 @@ the router (using UDP) for long term analysis and trend calculations
 ### How do I use it?
 - Please read the instructions on installing wrtbwmon on your router (first)
 - Review install.sh and update to match your system configuration
-- Install: ./install
+- Install: sudo ./install
 - launch receiver from the Remote directory :  ./monitor.py &
 - view usage graphs by connecting to your *nix device using a webrowser:
 	ex:   http://mydevice/cgi-bin/dailyReport.py
