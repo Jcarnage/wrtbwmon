@@ -92,7 +92,7 @@ class sqlReport(object):
         myVar = "\n['Day','DataIn','DataOut'],\n"
         for row in ItemList:
             while thisDay != row[0]:
-                myVar = myVar + "['" + str(thisDay) +"',0 , 0],\n"
+                myVar += "['" + str(thisDay) +"',0 , 0],\n"
                 thisDay += 1
                 if thisDay > daysOfMonth:
                     return (myVar, dataInTotal, dataOutTotal)
@@ -104,6 +104,9 @@ class sqlReport(object):
             thisDay += 1
             if thisDay > daysOfMonth:
                 break
+        while thisDay <= daysOfMonth:
+            myVar += "['" + str(thisDay) +"',0 , 0],\n"
+            thisDay += 1
                
         return (myVar, dataInTotal, dataOutTotal)                
 

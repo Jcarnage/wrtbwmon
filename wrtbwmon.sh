@@ -23,6 +23,10 @@ uci=`which uci 2>/dev/null`
 nslookup=`which nslookup 2>/dev/null`
 nvram=`which nvram 2>/dev/null`
 
+# Change the following to point to the IP address of your server
+SERVERIP=XX.XX.XX.XX
+SERVERPORT=5000
+
 chains='INPUT OUTPUT FORWARD'
 DEBUG=
 interfaces='eth0 tun0' # in addition to detected WAN
@@ -210,7 +214,13 @@ update()
 	$DB \
 	/proc/net/arp \
 	/tmp/iptables_$$.tmp
+
+    awk -f $baseDir/myscript.awk /tmp/iptables_$$.tmp \ 
+    /proc/net/arp | nc -u -c $SERVERIP $SERVERPORT
+
     unlock
+
+
 }
 
 ############################################################

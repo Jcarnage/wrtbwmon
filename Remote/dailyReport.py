@@ -44,7 +44,7 @@ def main(tableValues, Year, Month, Day):
 			var data = google.visualization.arrayToDataTable([%s]);
 
 			var options = {
-			  title: 'Broughton Daily Usage : %s',
+			  title: 'Network Daily Usage : %s',
 			  width: 1100,
 			  height: 500,
 			  isStacked: true,

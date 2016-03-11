@@ -44,7 +44,7 @@ def main(tableValues, Year, Month, Day):
 			var data = google.visualization.arrayToDataTable([%s]);
 
 			var options = {
-			  title: 'Broughton Daily Usage : %s',
+			  title: 'Network Bandwidth Report : %s',
 			  width: 1100,
 			  height: 500,
 			  isStacked: true,
@@ -74,7 +74,7 @@ def main(tableValues, Year, Month, Day):
 
 	page_str += """	</br></br>
 	<div id="form_entry">
-	<form action="/cgi-bin/dailyReport.py" method="post">
+	<form action="/cgi-bin/dailyBwReport.py" method="post">
 	Year: <input type="text" name="Year" size=5 maxLength=4 value="%s" />
 	Month: <input type="text" name="Month" size=2 maxLength=2 value="%s" />
 	Day: <input type="text" name="Day" size=2 maxLength=2 value="%s" />	
@@ -116,8 +116,6 @@ if __name__=="__main__":
         DD = int(form.getvalue('Day'))		
     except:
         (YY, MM, DD) = getDefaultDate()
-        MM = 2
-        DD = 28
 
     itemList = db.returnDayValues(YY, MM, DD, True)
     deviceList = db.getAllDeviceNames()

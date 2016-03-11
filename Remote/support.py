@@ -36,8 +36,18 @@ def tomorrow(YY, MM, DD):
 
 ##########################################################################
 def lastMonth(YY, MM):
+    if MM == 1:
+        MM == 12
+        YY -= 1
+    else:
+        MM -= 1
     return (YY, MM)
 
 ##########################################################################
 def nextMonth(YY, MM):
+    if MM == 12:
+        MM = 1
+        YY += 1
+    else:
+        MM += 1
     return (YY, MM)

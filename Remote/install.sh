@@ -4,7 +4,7 @@ srcDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 
 # The following is the title that will appear on all the web pages
-pageTitles="Data Consumption at Broughton Drive"
+pageTitles="Enter the Title for the Web Pages"
 
 # *****************************************************************
 # The following section will identify the location of cgi-bin based
