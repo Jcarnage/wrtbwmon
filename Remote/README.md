@@ -21,6 +21,17 @@ the router (using UDP) for long term analysis and trend calculations
 		  http://mydevice/cgi-bin/deviceDailyReport.py
 		  http://mydevice/cgi-bin/monthlyReport.py
 
+### Updating sql entries directly
+To update the sql tables so that a device name is tied to it's MAC address follow this sequence:
+- Navigate to the directory with netMonitor.sqlite and launch the sqlite program as follows:
+	- sqlite3 netMonitor.sqlite
+- Show the current table entries:
+	- select * from tblMac;
+	- The table has three columns (macId, MAC, pcName)
+- Update any items that show the device name as TBD
+	- UPDATE tblMac SET pcName="<ENTER YOUR DEVICE NAME>" WHERE macId=<FIRST COLUMN NUMBER>;
+ 
+
 ### Regular updates
  - Add the following to user's crontab, assuming `<script location>` is replaced with the actual location:
 	5 0 * * * /<script location>/nightly.sh
