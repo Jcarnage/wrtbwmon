@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 srcDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -28,7 +28,8 @@ fi
 pythonFiles=(dailyReport.py deviceDailyReport.py monthlyReport.py dailyBwReport.py)
 for file in "${pythonFiles[@]}"
   do
-	sed s/PAGE_TITLE/"$pageTitles"/ $file > $CgiBin/$file
+#	sed s/PAGE_TITLE/"$pageTitles"/ $file > $CgiBin/$file
+	sed s/PAGE_TITLE/""/ $file > $CgiBin/$file
     chmod +x $CgiBin/$file 
   done
 
@@ -65,6 +66,10 @@ if [ ! -d "$htmlPath" ] ; then
 	mkdir -p $htmlPath
 fi
 
-cp stylesheet.css $htmlPath/.
+htmlFiles=(index.html home.html stylesheet.css netMonitor.jpg dbTables.gif)
+for file in "${htmlFiles[@]}"
+  do
+	cp $file $htmlPath/.
+  done
 
 

@@ -53,12 +53,10 @@ class sqlReport(object):
     def printDailySummary(self, ItemList, devices):
         divisor = 1048576
         lclDict = {}
+        activeDevices = {}
         # The following is used to provide ordering for the dictionary
         time = []
-        var = "[ 'Time', '" + devices[0]
-        for i in range(1, len(devices)):
-            var += "', '" + devices[i]
-        var += "' ],\n"
+
         # The following for loop will stack the items in a a dictionary, in ways
         # that we can easily pull data out of (dictionary of dictionarys).  It's
         # easier to do it this way than to try to build the information on the fly
@@ -68,16 +66,24 @@ class sqlReport(object):
                 time.append(item[0])
               
             lclDict[item[0]][item[3]] = [item[1], item[2]] # [DataIn, DataOut]
+            activeDevices[item[3]] = [""]
+        # Create the header information
+        var = "[ 'Time'" 
+        for i in range(0, len(devices)):
+            if devices[i] in activeDevices:
+                var +=  ", '" + devices[i] + "'"
+        var += " ],\n"
         # Use the time (which is ordered to build our charts in the proper sequence
         for item in time:
             var += "[ '"  + item +"'"
             # For each time value, get the ordered list of the various devices.
             for i in devices:
-                if i in lclDict[item]:
-                    var += ", " + str(lclDict[item][i][0]) # [Only look at dataIn (for now)
-            # If a device was not active during this time frame pad it 0 (don't leave empty)
-                else:
-                    var += ", 0"
+                if i in activeDevices:
+                    if i in lclDict[item]:
+                        var += ", " + str(lclDict[item][i][0]) # [Only look at dataIn (for now)
+                # If a device was not active during this time frame pad it 0 (don't leave empty)
+                    else:
+                        var += ", 0"
             var += " ],\n"
         return var
 

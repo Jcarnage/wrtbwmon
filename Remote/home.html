@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link type="text/css" rel="stylesheet" href="/netMonitor/stylesheet.css"/>
+    </head>
+<body>
+<div class="body_home">
+    <p ><span>netMonitor</span> is a companion set of scripts to the wrtbwmon program.  It records all information into a sqlite database for easy processing and parsing as needed.</p>
+
+    <p> I developped these sets of scripts as I was looking for something more flexible than what was available out there.   Piggy backing off the wrtbwmon application seemed like a natural fit as all the relevant data was already being collected and all I had to do was develop some scripts for a remote server (a PI 2 Model B in my case)</p>
+
+    <section>
+    <h4>Database Tables</h4>
+    The database consists of four tables broken down as follows:
+    <div>
+    <img id="dbTable" src="/netMonitor/dbTables.gif" alt="database Tables" Title="netMonitor"/>
+    </div>
+    <p> There are three tables that are linked (<u>tblMac</u>, <u>tblData</u> and <u>tblDateInfo</u>) and one table (<u>tblDailySummary</u>) that has no direct link to the other three tables.  Details on how to use these tables can be found in <i>sqlClass.py</i></p>
+    </section>
+
+    <section>
+    <h4>General Info</h4>
+    <p> The application is set up to listen to port 5000 (UDP).  If that port is taken by some other application in your setup, you can change that port by editing <i>monitor.py</i> and <i>wrtbwmon.sh</i> so that they are communicating on the same UDP port.   Also, data is stored into the database every 15 minutes.   Depending on your needs to can reduce or increase that timer by modifying the <u>interval</u> variable in <i>monitor.py</i> </p>
+    <p> See the README file for other information regarding queries and startup of the monitor </p>
+    </section>
+    <p> Please leave any comments or questions on GitHub and I will get back with you as soon as possible</p>
+
+</div>
+</section>
+</body>
+</html>

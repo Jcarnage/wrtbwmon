@@ -1,6 +1,6 @@
 body {
 	background-color: #808080;
-	font-size: 1.2em;
+	font-size: 1.0em;
 }
 
 h1 {
@@ -9,6 +9,73 @@ h1 {
 	font-family: Cursive;
 	font-size: 1.9em;
 	color: white;
+}
+
+h3 {
+	width: 1100px;
+	text-align: center;
+	color: white;
+	font-family: Cursive, sans-serif, Courier;
+}
+
+h4 {
+	color: white;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* Class based definitions follow */
+
+.body_home {
+	font-size: .9em;
+	color: white;
+    width: 1100px;
+}
+
+.body_home span {
+	font-weight: bold;
+}
+
+.menuButton{
+    border-radius: 5px;
+    border: 2px solid #6495ED;
+    background-color: #BCD2EE;
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.8em;
+    padding:3px 7px 3px 7px;
+    margin-left:15px;
+}
+
+
+.menuButton:hover {
+	background-color: #BCD20E; 	
+}
+
+/* Id based defintions follow */
+#menu {
+    width: 1100px;
+    text-align: center;
+}
+
+#dbTable {
+    padding-left: 150px;
+    width: 700px;
+    height: 350px;
+}
+
+#iframe {
+    position: relative;
+    width: 1150px;
+    height: 760px;
+    margin-top: 10px;
+    font-size: 10px;
+}
+
+
+#footer p {
+	color: white;
+	font-size: 12px;
 }
 
 #form_entry {
@@ -23,12 +90,14 @@ form {
 }
 
 #error {
-	width: 1100px;
-	text-align :center;
-	color: white;
-	font-weight: bold;
-	text-decoration: underline;
-	font-size: 1.2em;
+    width: 1100px;
+    height: 300px;
+    padding-top: 200px;
+    text-align :center;
+    color: white;
+    font-weight: bold;
+    text-decoration: underline;
+    font-size: 1.2em;
 }
 
 #submit {
@@ -48,10 +117,24 @@ form {
 	background: red;	
 }
 
+#image {
+    position: relative;
+    width: 75px;
+    top: -20px;
+    /*height: 100px; */
+    left: 500px
+}
+
+#tableInfo {
+    border: 1px;
+}
+
+
+
 #previous {
 	position: relative;
 	left: 350px;
-	top: 10px;
+	top: 40px;
 	border-radius: 5px;
 	border: 2px solid #6495ED;
 	background-color: #BCD2EE;
@@ -67,7 +150,7 @@ form {
 #next {
 	position: relative;
 	left: 600px;
-	top: -24px;
+	top: -75px;
 	border-radius: 5px;
 	border: 2px solid #6495ED;
 	background-color: #BCD2EE;
