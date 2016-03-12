@@ -120,6 +120,11 @@ class tstSqlClass(unittest.TestCase):
         macList["01:12:23:34:45:56"] = [1500, 12200];
         q = sqlClass.sqlAccess("test.sqlite")
         self.assertEqual(q.storeData(macList), 1)
+        deviceNames = q.getAllDeviceNames()
+        self.assertEqual(len(deviceNames), 6)
+        self.assertEqual(deviceNames[4], "01:12:23:34:45:56")  
+        self.assertEqual(deviceNames[5], "00:11:22:33:44:55")
+
 
     def test_d_returnDayValues(self):
         q = sqlClass.sqlAccess("test.sqlite")

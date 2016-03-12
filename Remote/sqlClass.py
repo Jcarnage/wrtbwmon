@@ -227,7 +227,7 @@ class sqlAccess(object):
             dateIndex = self._timeStamp()
             #Loop through the dictionary data
             for macKey in dictData.keys():
-                macIndex = self._writeMac(macKey, "TBD")
+                macIndex = self._writeMac(macKey, macKey)
                 i = dictData[macKey]
                 sql = "INSERT INTO tblData (macId, dateId, dataOut, dataIn) "
                 sql += "VALUES (%d, %d, %d, %d) " % (macIndex, dateIndex, i[0], i[1])

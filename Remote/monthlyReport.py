@@ -50,7 +50,7 @@ def main(tableValues, Year, Month):
               isStacked: true,
               backgroundColor: '#808090',
               hAxis: {title: 'Day of Month', titleTextStyle: {color: 'white'}},
-              vAxis: {title: 'Bandwith (MB)', titleTextStyle: {color: 'white'}},
+              vAxis: {title: 'Bandwith (KB)', titleTextStyle: {color: 'white'}},
               chartArea: {
             		backgroundColor: {
                 		stroke: '#fff',
