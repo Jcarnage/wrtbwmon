@@ -2,20 +2,26 @@ function inInterfaces(host){
     return(interfaces ~ "(^| )"host"($| )")
 }
 
-function newRule(arp_ip){
-    system("iptables -t mangle -I RRDIPT_FORWARD -d " arp_ip " -j RETURN")
-    system("iptables -t mangle -I RRDIPT_FORWARD -s " arp_ip " -j RETURN")
+function newRule(arp_ip,
+    ipt_cmd){
+    # checking for existing rules shouldn't be necessary if newRule is
+    # always called after db is read, arp table is read, and existing
+    # iptables rules are read.
+    ipt_cmd="iptables -t mangle -j RETURN -s " arp_ip
+    system(ipt_cmd " -C RRDIPT_FORWARD 2>/dev/null || " ipt_cmd " -A RRDIPT_FORWARD")
+    ipt_cmd="iptables -t mangle -j RETURN -d " arp_ip
+    system(ipt_cmd " -C RRDIPT_FORWARD 2>/dev/null || " ipt_cmd " -A RRDIPT_FORWARD")
 }
 
 function total(i){
     return(bw[i "/in"] + bw[i "/out"])
 }
 
-function date(){
+function date(    cmd, d){
     cmd="date +%d-%m-%Y_%H:%M:%S"
     cmd | getline d
     close(cmd)
-#!@todo could start a process with "while true; do date ...; done"
+    #!@todo could start a process with "while true; do date ...; done"
     return(d)
 }
 
@@ -24,7 +30,6 @@ BEGIN {
     fid=1
     debug=0
     rrd=0
-    split("", mac)
 }
 
 /^#/ { # get DB filename
@@ -41,13 +46,12 @@ FNR==NR { #!@todo this doesn't help if the DB file is empty.
     else
 	n=$2
 
-    hosts[n] = ""
+    hosts[n] = "" # add this host/interface to hosts
     mac[n]        =  $1
     ip[n]         =  $2
     inter[n]      =  $3
     bw[n "/in"]   =  $4
     bw[n "/out"]  =  $5
-    # total = $6
     firstDate[n]  =  $7
     lastDate[n]   =  $8
     next
@@ -56,7 +60,7 @@ FNR==NR { #!@todo this doesn't help if the DB file is empty.
 # not triggered on the first file
 FNR==1 {
     FS=" "
-    fid++
+    fid++ #!@todo use fid for all files; may be problematic for empty files
     next
 }
 
@@ -74,11 +78,17 @@ fid==2 {
 	mac[arp_ip]   = arp_mac
 	ip[arp_ip]    = arp_ip
 	inter[arp_ip] = arp_dev
-	bw[arp_ip "/in"]=bw[arp_ip "/out"] = 0
-	firstDate[arp_ip]=lastDate[arp_ip] = date()
+	bw[arp_ip "/in"] = bw[arp_ip "/out"] = 0
+	firstDate[arp_ip] = lastDate[arp_ip] = date()
     }
     next
 }
+
+#!@todo could use mangle chain totals or tailing "unnact" rules to
+# account for data for new hosts from their first presence on the
+# network to rule creation. The "unnact" rules would have to be
+# maintained at the end of the list, and new rules would be inserted
+# at the top.
 
 # skip line
 # read the chain name and deal with the data accordingly
@@ -89,55 +99,57 @@ fid==3 && $1 == "Chain"{
 
 fid==3 && rrd && (NF < 9 || $1=="pkts"){ next }
 
-# iptables input
-#!@todo if we read this first, the need for new rules will not have to wait until END
-fid==3 && rrd {
+fid==3 && rrd { # iptables input
     if($6 != "*"){
-	n=$6 "/out"
 	m=$6
+	n=m "/out"
     } else if($7 != "*"){
-	n=$7 "/in"
 	m=$7
+	n=m "/in"
     } else if($8 != "0.0.0.0/0"){
-	n=$8 "/out"
 	m=$8
+	n=m "/out"
     } else { # $9 != "0.0.0.0/0"
-	n=$9 "/in"
 	m=$9
+	n=m "/in"
     }
+
+    # remove host from array; any hosts left in array at END get new
+    # iptables rules
+
+    #!@todo this deletes a host if any rule exists; if only one
+    # directional rule is removed, this will not remedy the situation
     delete hosts[m]
-    if($2 > 0){
+
+    if($2 > 0){ # counted some bytes
 	if(mode == "diff" || mode == "noUpdate")
 	    print n, $2
 	if(mode!="noUpdate"){
-	    bw[n]+=$2
-	    # compare label to wan input variable
-	    if(inInterfaces(m)){
-		if(!(m in mac)){
-		    firstDate[m]=lastDate[m] = date()
+	    if(inInterfaces(m)){ # if label is an interface
+		if(!(m in mac)){ # if label was not in db (also not in
+				 # arp table, but interfaces won't be
+				 # there anyway)
+		    firstDate[m] = date()
 		    mac[m] = inter[m] = m
 		    ip[m] = "NA"
-		    bw[n]=bw[n]= 0
+		    bw[m "/in"]=bw[m "/out"]= 0
 		}
 	    }
+	    bw[n]+=$2
 	    lastDate[m] = date()
 	}
     }
 }
 
 END {
-    if(mode=="noUpdate")
-	exit
+    if(mode=="noUpdate") exit
     close(dbFile)
     system("rm -f " dbFile)
     print "#mac,ip,iface,in,out,total,first_date,last_date" > dbFile
     OFS=","
     for(i in mac)
 	print mac[i], ip[i], inter[i], bw[i "/in"], bw[i "/out"], total(i), firstDate[i], lastDate[i] > dbFile
-
+    close(dbFile)
     # for hosts without rules
-    for(host in hosts){
-	if(!inInterfaces(host))
-	    newRule(host)
-    }
+    for(host in hosts) if(!inInterfaces(host)) newRule(host)
 }

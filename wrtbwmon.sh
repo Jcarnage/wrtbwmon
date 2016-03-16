@@ -33,10 +33,9 @@ interfaces='eth0 tun0' # in addition to detected WAN
 DB=$2
 mode=
 
+# DNS server for reverse lookups provided in "DNS".
 # don't perform reverse DNS lookups by default
-DO_RDNS=
-# DNS server for reverse lookups
-DNS=
+DO_RDNS=${DNS-}
 
 header="#mac,ip,iface,in,out,total,first_date,last_date"
 
@@ -158,18 +157,13 @@ unlock()
 newChain()
 {
     chain=$1
-
-    #Create the RRDIPT_$chain chain (it doesn't matter if it already exists).
+    # Create the RRDIPT_$chain chain (it doesn't matter if it already exists).
     iptables -t mangle -N RRDIPT_$chain 2> /dev/null
     
-    #Add the RRDIPT_$chain CHAIN to the $chain chain (if non existing).
-    iptables -t mangle -L $chain --line-numbers -n | grep "RRDIPT_$chain" > /dev/null
+    # Add the RRDIPT_$chain CHAIN to the $chain chain if not present
+    iptables -t mangle -C $chain -j RRDIPT_$chain 2>/dev/null
     if [ $? -ne 0 ]; then
-	iptables -t mangle -L $chain -n | grep "RRDIPT_$chain" > /dev/null
-	if [ $? -eq 0 ]; then
-	    [ -n "$DEBUG" ] && echo "DEBUG: iptables chain misplaced, recreating it..."
-	    iptables -t mangle -D $chain -j RRDIPT_$chain
-	fi
+	[ -n "$DEBUG" ] && echo "DEBUG: iptables chain misplaced, recreating it..."
 	iptables -t mangle -I $chain -j RRDIPT_$chain
     fi
 }
@@ -180,15 +174,13 @@ newRuleIF()
     chain=$1
     IF=$2
     
-    iptables -t mangle -nvL RRDIPT_$chain | grep " $IF " > /dev/null
-    if [ "$?" -ne 0 ]; then
-	if [ "$chain" = "OUTPUT" ]; then
-	    iptables -t mangle -A RRDIPT_$chain -o $IF -j RETURN
-	elif [ "$chain" = "INPUT" ]; then
-	    iptables -t mangle -A RRDIPT_$chain -i $IF -j RETURN
-	fi
-    elif [ -n "$DEBUG" ]; then
-	echo "DEBUG: table mangle chain $chain rule $IF already exists?"
+    #!@todo test
+    if [ "$chain" = "OUTPUT" ]; then
+	cmd="iptables -t mangle -o $IF -j RETURN"
+	eval $cmd " -C RRDIPT_$chain 2>/dev/null" || eval $cmd " -A RRDIPT_$chain"
+    elif [ "$chain" = "INPUT" ]; then
+	cmd="iptables -t mangle -i $IF -j RETURN"
+	eval $cmd " -C RRDIPT_$chain 2>/dev/null" || eval $cmd " -A RRDIPT_$chain"
     fi
 }
 
@@ -201,15 +193,14 @@ update()
     checkDB
     checkWAN
 
+    > /tmp/iptables_$$.tmp
     lock
-    #!@todo only zero our own chains
-    iptables -nvxL -t mangle -Z > /tmp/iptables_$$.tmp
-    # echo awk -v mode="$mode" -v interfaces=\""$interfaces"\" -f $binDir/readDB.awk \
-    # 	$DB \
-    # 	/proc/net/arp \
-    # 	/tmp/iptables_$$.tmp
-
-    # exit 1
+    # only zero our own chains
+    for chain in $chains; do
+	iptables -nvxL RRDIPT_$chain -t mangle -Z >> /tmp/iptables_$$.tmp
+    done
+    # the iptables and readDB commands have to be separate. Otherwise,
+    # they will fight over iptables locks
     awk -v mode="$mode" -v interfaces=\""$interfaces"\" -f $binDir/readDB.awk \
 	$DB \
 	/proc/net/arp \
@@ -244,7 +235,7 @@ case $1 in
 
     "publish" )
 	checkDbArg
-	[ -z "$3" ] && echo "ERROR: Missing argument 3" && exit 1
+	[ -z "$3" ] && echo "ERROR: Missing argument 3 (output html file)" && exit 1
 	
 	# sort DB
 	lock
@@ -259,7 +250,7 @@ case $1 in
 	while IFS=, read PEAKUSAGE_IN MAC IP IFACE PEAKUSAGE_OUT TOTAL FIRSTSEEN LASTSEEN
 	do
 	    echo "
-new Array(\"$(lookup $MAC $IP $4)\",
+new Array(\"$(lookup $MAC $IP $4)\",\"$MAC\",\"$IP\",
 $PEAKUSAGE_IN,$PEAKUSAGE_OUT,$TOTAL,\"$FIRSTSEEN\",\"$LASTSEEN\")," >> $3.tmp
 	done < /tmp/sorted_$$.tmp
 	echo "0);" >> $3.tmp
@@ -275,11 +266,8 @@ $PEAKUSAGE_IN,$PEAKUSAGE_OUT,$TOTAL,\"$FIRSTSEEN\",\"$LASTSEEN\")," >> $3.tmp
     
     "setup" )
 	checkDbArg
-	if [ -w "$DB" ]; then
-	    echo "Warning: using existing $DB"
-	else
-	    createDbIfMissing
-	fi
+	[ -w "$DB" ] && echo "Warning: using existing $DB"
+	createDbIfMissing
 	
 	for chain in $chains; do
 	    newChain $chain
@@ -305,6 +293,7 @@ $PEAKUSAGE_IN,$PEAKUSAGE_OUT,$TOTAL,\"$FIRSTSEEN\",\"$LASTSEEN\")," >> $3.tmp
 
     "remove" )
 	iptables-save | grep -v RRDIPT | iptables-restore
+	rm -rf "$lockDir"
 	;;
 
     *)
