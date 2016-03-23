@@ -202,10 +202,12 @@ class sqlAccess(object):
     def getDeviceList(self):
         deviceName = {}
         cur = self.conn.cursor()
-        cur.execute("SELECT macId, pcName FROM tblMac")
+        cur.execute("SELECT macId, pcName FROM tblMac ORDER BY pcName COLLATE NOCASE")
         rows = cur.fetchall()
+        idx = 0
         for row in rows:
-            deviceName[row[0]] = row[1]
+            deviceName[idx] = [row[0], row[1]]
+            idx += 1
         return deviceName
 
     def getAllDeviceNames(self):

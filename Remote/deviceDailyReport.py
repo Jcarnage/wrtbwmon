@@ -25,11 +25,13 @@ def main(tableValues, Year, Month, Day, ID, deviceDict):
     searchDate = str(Year) + "-" + str(Month) + "-" + str(Day)
     dropDownItems = ''
     ########  Prepare information for Dropdown ###################
-    for item in deviceDict:
-        if item == ID:
-            dropDownItems += "<option value=\"" + str(item) + "\" selected>" + deviceDict[item] + "</option>\n"
+    for x in deviceDict:
+        item = deviceDict[x]
+        if item[0] == ID:
+            selection = item[1]
+            dropDownItems += "<option value=\"" + str(item[0]) + "\" selected>" + item[1] + "</option>\n"
         else:
-            dropDownItems += "<option value=\"" + str(item) + "\">" + deviceDict[item] + "</option>\n"
+            dropDownItems += "<option value=\"" + str(item[0]) + "\">" + item[1] + "</option>\n"
 	
     printHTTPheader()
 
@@ -56,7 +58,7 @@ def main(tableValues, Year, Month, Day, ID, deviceDict):
               height: 500,
               isStacked: true,
               backgroundColor: '#808090',
-              hAxis: {title: 'Date', titleTextStyle: {color: 'white'}},
+              hAxis: {title: 'Time', titleTextStyle: {color: 'white'}},
               vAxis: {title: 'Bandwith (B)', titleTextStyle: {color: 'white'}},
               chartArea: {
             		backgroundColor: {
@@ -72,7 +74,7 @@ def main(tableValues, Year, Month, Day, ID, deviceDict):
             chart.draw(data, options);
           }
         </script>
-        <div id="chart_div"></div>""" % (tableValues, searchDate, deviceDict[ID])
+        <div id="chart_div"></div>""" % (tableValues, searchDate, selection)
     else:
         page_str += """
         <div id="error">There is no data for the date provided</div>
